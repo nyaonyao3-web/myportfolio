@@ -1,0 +1,343 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  BookOpen, 
+  Mail, 
+  Users, 
+  Presentation, 
+  Handshake, 
+  CheckCircle2, 
+  ChevronRight, 
+  Trophy, 
+  Home, 
+  Search,
+  BookMarked,
+  Layout
+} from 'lucide-react';
+
+const CATEGORIES = [
+  { id: 'email', title: 'ビジネスメール', icon: Mail, color: 'bg-blue-500' },
+  { id: 'meeting', title: '会議・議論', icon: Users, color: 'bg-green-500' },
+  { id: 'presentation', title: 'プレゼンテーション', icon: Presentation, color: 'bg-purple-500' },
+  { id: 'negotiation', title: '交渉・契約', icon: Handshake, color: 'bg-orange-500' },
+];
+
+const LESSON_DATA = {
+  email: {
+    title: "ビジネスメールの基本",
+    description: "プロフェッショナルな印象を与えるメール作成術",
+    phrases: [
+      { en: "I am writing to follow up on...", jp: "〜の件で追跡のご連絡を差し上げました。" },
+      { en: "Could you please clarify...", jp: "〜について明確にしていただけますか？" },
+      { en: "Attached please find the report.", jp: "レポートを添付いたしましたのでご確認ください。" },
+      { en: "I look forward to hearing from you.", jp: "お返事をお待ちしております。" }
+    ],
+    quiz: [
+      {
+        question: "「お忙しいところ恐縮ですが」を英語で言うと？",
+        options: ["I know you're busy, but...", "Thank you for your business.", "Sorry for the wait."],
+        correct: 0
+      },
+      {
+        question: "メールの結びで「敬具」に相当する一般的な表現は？",
+        options: ["Best regards,", "See you,", "Hello,"],
+        correct: 0
+      }
+    ]
+  },
+  meeting: {
+    title: "会議での発言",
+    description: "意見を伝え、議論を円滑に進めるための表現",
+    phrases: [
+      { en: "Let's move on to the next item.", jp: "次の議題に移りましょう。" },
+      { en: "I'd like to point out that...", jp: "〜という点を指摘したいと思います。" },
+      { en: "Could you speak up a bit?", jp: "もう少し大きな声で話していただけますか？" },
+      { en: "I agree with your point.", jp: "あなたのおっしゃる通りだと思います。" }
+    ],
+    quiz: [
+      {
+        question: "「本題に入りましょう」を英語で言うと？",
+        options: ["Let's get down to business.", "Let's start the party.", "Go to the point."],
+        correct: 0
+      }
+    ]
+  },
+  presentation: {
+    title: "プレゼンテーション",
+    description: "聴衆を惹きつけ、明確に情報を伝えるスキル",
+    phrases: [
+      { en: "Today, I'd like to talk about...", jp: "本日、〜についてお話ししたいと思います。" },
+      { en: "If you look at this chart...", jp: "こちらのチャートをご覧いただくと..." },
+      { en: "In conclusion, we should...", jp: "結論として、私たちは〜すべきです。" },
+      { en: "Are there any questions?", jp: "何かご質問はありますか？" }
+    ],
+    quiz: [
+      {
+        question: "プレゼンの冒頭で「自己紹介をさせてください」と言うには？",
+        options: ["Let me introduce myself.", "I am me.", "Look at me."],
+        correct: 0
+      }
+    ]
+  },
+  negotiation: {
+    title: "交渉の進め方",
+    description: "ウィンウィンの関係を築くための高度な対話",
+    phrases: [
+      { en: "What are your thoughts on this proposal?", jp: "この提案についてどう思われますか？" },
+      { en: "We are willing to compromise on...", jp: "〜については歩み寄る用意があります。" },
+      { en: "That would be difficult for us.", jp: "それは弊社にとって難しいです。" },
+      { en: "Let's wrap up for today.", jp: "本日はここまでにしましょう。" }
+    ],
+    quiz: [
+      {
+        question: "「妥協点を見つけましょう」を英語で言うと？",
+        options: ["Let's find common ground.", "Give me more money.", "Stop talking."],
+        correct: 0
+      }
+    ]
+  }
+};
+
+export default function App() {
+  const [view, setView] = useState('home'); // home, lesson, quiz, result
+  const [selectedCat, setSelectedCat] = useState(null);
+  const [quizIdx, setQuizIdx] = useState(0);
+  const [score, setScore] = useState(0);
+
+  const startLesson = (catId) => {
+    setSelectedCat(catId);
+    setView('lesson');
+  };
+
+  const startQuiz = () => {
+    setQuizIdx(0);
+    setScore(0);
+    setView('quiz');
+  };
+
+  const handleAnswer = (idx) => {
+    const isCorrect = idx === LESSON_DATA[selectedCat].quiz[quizIdx].correct;
+    if (isCorrect) setScore(score + 1);
+
+    if (quizIdx + 1 < LESSON_DATA[selectedCat].quiz.length) {
+      setQuizIdx(quizIdx + 1);
+    } else {
+      setView('result');
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans">
+      {/* Header */}
+      <header className="bg-white border-b sticky top-0 z-10">
+        <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
+          <div 
+            className="flex items-center gap-2 cursor-pointer" 
+            onClick={() => setView('home')}
+          >
+            <div className="bg-indigo-600 p-2 rounded-lg">
+              <BookOpen className="text-white w-5 h-5" />
+            </div>
+            <h1 className="text-xl font-bold tracking-tight">English <span className="text-indigo-600">Lesson</span></h1>
+          </div>
+          <nav className="hidden md:flex items-center gap-6">
+            <button onClick={() => setView('home')} className="text-sm font-medium hover:text-indigo-600 transition-colors">ホーム</button>
+            <button className="text-sm font-medium hover:text-indigo-600 transition-colors">学習履歴</button>
+            <button className="text-sm font-medium hover:text-indigo-600 transition-colors">設定</button>
+          </nav>
+          <div className="flex items-center gap-2 bg-indigo-50 px-3 py-1 rounded-full">
+            <Trophy className="w-4 h-4 text-indigo-600" />
+            <span className="text-sm font-bold text-indigo-700">LV. 12</span>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-5xl mx-auto px-4 py-8">
+        {view === 'home' && (
+          <section className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="mb-10 text-center md:text-left">
+              <h2 className="text-3xl font-extrabold mb-4">今日は何を学びますか？</h2>
+              <p className="text-slate-600">各シーンに合わせた実践的なフレーズとクイズを用意しています。</p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {CATEGORIES.map((cat) => (
+                <div 
+                  key={cat.id}
+                  onClick={() => startLesson(cat.id)}
+                  className="bg-white p-6 rounded-2xl shadow-sm hover:shadow-md transition-all border border-slate-100 cursor-pointer group"
+                >
+                  <div className={`${cat.color} w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                    <cat.icon className="text-white w-6 h-6" />
+                  </div>
+                  <h3 className="font-bold text-lg mb-1">{cat.title}</h3>
+                  <p className="text-sm text-slate-500 mb-4">{LESSON_DATA[cat.id].description}</p>
+                  <div className="flex items-center text-indigo-600 font-semibold text-sm">
+                    はじめる <ChevronRight className="w-4 h-4 ml-1" />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-12 bg-indigo-600 rounded-3xl p-8 text-white flex flex-col md:flex-row items-center gap-8 shadow-xl">
+              <div className="flex-1">
+                <h3 className="text-2xl font-bold mb-2">毎日の目標を達成しましょう</h3>
+                <p className="opacity-90 mb-6">1日5分の学習で、ビジネスの現場で自信を持って話せるようになります。</p>
+                <button className="bg-white text-indigo-600 px-6 py-3 rounded-xl font-bold hover:bg-opacity-90 transition-all">
+                  デイリーチャレンジに挑戦
+                </button>
+              </div>
+              <div className="hidden md:block">
+                <div className="bg-white/10 p-4 rounded-2xl backdrop-blur-md border border-white/20">
+                  <div className="grid grid-cols-7 gap-2">
+                    {[...Array(7)].map((_, i) => (
+                      <div key={i} className={`w-8 h-8 rounded-md ${i < 4 ? 'bg-green-400' : 'bg-white/20'}`}></div>
+                    ))}
+                  </div>
+                  <p className="text-xs mt-3 text-center opacity-80 font-medium">4日間連続学習中！</p>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {view === 'lesson' && selectedCat && (
+          <div className="animate-in fade-in slide-in-from-right-4 duration-500">
+            <button 
+              onClick={() => setView('home')}
+              className="mb-6 flex items-center text-slate-500 hover:text-slate-800"
+            >
+              ← 戻る
+            </button>
+            <div className="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
+              <div className="flex items-center gap-4 mb-6">
+                <div className={`${CATEGORIES.find(c => c.id === selectedCat).color} p-3 rounded-2xl`}>
+                  {React.createElement(CATEGORIES.find(c => c.id === selectedCat).icon, { className: "text-white w-8 h-8" })}
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold">{LESSON_DATA[selectedCat].title}</h2>
+                  <p className="text-slate-500">{LESSON_DATA[selectedCat].description}</p>
+                </div>
+              </div>
+
+              <div className="space-y-4 mt-8">
+                <h3 className="font-bold text-lg flex items-center gap-2">
+                  <BookMarked className="w-5 h-5 text-indigo-600" />
+                  重要フレーズ
+                </h3>
+                {LESSON_DATA[selectedCat].phrases.map((phrase, i) => (
+                  <div key={i} className="p-4 bg-slate-50 rounded-xl border border-slate-100 hover:bg-indigo-50/50 transition-colors">
+                    <p className="text-indigo-600 font-bold mb-1 text-lg">{phrase.en}</p>
+                    <p className="text-slate-600 text-sm">{phrase.jp}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-10 flex justify-center">
+                <button 
+                  onClick={startQuiz}
+                  className="bg-indigo-600 text-white px-10 py-4 rounded-2xl font-bold text-lg shadow-lg hover:shadow-indigo-200 hover:-translate-y-0.5 transition-all"
+                >
+                  このカテゴリのテストを受ける
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {view === 'quiz' && selectedCat && (
+          <div className="max-w-2xl mx-auto animate-in fade-in zoom-in-95 duration-300">
+            <div className="mb-8">
+              <div className="flex justify-between items-end mb-2">
+                <span className="text-sm font-bold text-indigo-600">Question {quizIdx + 1}/{LESSON_DATA[selectedCat].quiz.length}</span>
+                <span className="text-xs text-slate-400">正解するとポイントが貯まります</span>
+              </div>
+              <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                <div 
+                  className="bg-indigo-600 h-full transition-all duration-300"
+                  style={{ width: `${((quizIdx + 1) / LESSON_DATA[selectedCat].quiz.length) * 100}%` }}
+                ></div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-3xl p-8 shadow-xl border border-slate-100">
+              <h3 className="text-xl font-bold mb-8 text-center leading-relaxed">
+                {LESSON_DATA[selectedCat].quiz[quizIdx].question}
+              </h3>
+              <div className="space-y-4">
+                {LESSON_DATA[selectedCat].quiz[quizIdx].options.map((opt, i) => (
+                  <button
+                    key={i}
+                    onClick={() => handleAnswer(i)}
+                    className="w-full text-left p-5 rounded-2xl border-2 border-slate-100 hover:border-indigo-600 hover:bg-indigo-50 font-medium transition-all group flex items-center justify-between"
+                  >
+                    <span>{opt}</span>
+                    <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-indigo-600 transition-colors" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {view === 'result' && (
+          <div className="max-w-md mx-auto text-center animate-in fade-in zoom-in-95 duration-500">
+            <div className="bg-white rounded-3xl p-10 shadow-xl border border-slate-100 mb-6">
+              <div className="w-24 h-24 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Trophy className="w-12 h-12 text-yellow-500" />
+              </div>
+              <h2 className="text-3xl font-extrabold mb-2">お疲れ様でした！</h2>
+              <p className="text-slate-500 mb-8">テスト結果を確認しましょう。</p>
+              
+              <div className="flex justify-center gap-8 mb-8">
+                <div>
+                  <p className="text-4xl font-black text-indigo-600">{score}</p>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Score</p>
+                </div>
+                <div className="w-px bg-slate-100"></div>
+                <div>
+                  <p className="text-4xl font-black text-green-500">+{score * 10}</p>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Points</p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <button 
+                  onClick={() => setView('home')}
+                  className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:bg-indigo-700 transition-all shadow-md"
+                >
+                  ホームに戻る
+                </button>
+                <button 
+                  onClick={() => startLesson(selectedCat)}
+                  className="w-full bg-slate-50 text-slate-600 py-4 rounded-2xl font-bold hover:bg-slate-100 transition-all"
+                >
+                  もう一度学習する
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* Bottom Nav for Mobile */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t px-6 py-3 flex justify-between items-center z-10 shadow-lg">
+        <button onClick={() => setView('home')} className="flex flex-col items-center gap-1">
+          <Home className={`w-6 h-6 ${view === 'home' ? 'text-indigo-600' : 'text-slate-400'}`} />
+          <span className={`text-[10px] font-bold ${view === 'home' ? 'text-indigo-600' : 'text-slate-400'}`}>ホーム</span>
+        </button>
+        <button className="flex flex-col items-center gap-1">
+          <Search className="w-6 h-6 text-slate-400" />
+          <span className="text-[10px] font-bold text-slate-400">検索</span>
+        </button>
+        <button className="flex flex-col items-center gap-1">
+          <Layout className="w-6 h-6 text-slate-400" />
+          <span className="text-[10px] font-bold text-slate-400">ライブラリ</span>
+        </button>
+        <button className="flex flex-col items-center gap-1">
+          <Users className="w-6 h-6 text-slate-400" />
+          <span className="text-[10px] font-bold text-slate-400">コミュニティ</span>
+        </button>
+      </nav>
+    </div>
+  );
+}
